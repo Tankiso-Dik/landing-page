@@ -4,7 +4,11 @@
  */
 import { getServerSideSitemap } from 'next-sitemap'
 import { unstable_cache } from 'next/cache'
+import { assertEnv } from '@/utilities/assertEnv'
 import { getPayloadCached } from '@/utilities/getPayloadCached'
+
+// Ensure required env variables are set before running
+assertEnv(['NEXT_PUBLIC_SERVER_URL', 'VERCEL_PROJECT_PRODUCTION_URL'])
 
 const getPagesSitemap = unstable_cache(
   async () => {
@@ -72,6 +76,5 @@ const getPagesSitemap = unstable_cache(
 
 export async function GET() {
   const sitemap = await getPagesSitemap()
-
   return getServerSideSitemap(sitemap)
 }
