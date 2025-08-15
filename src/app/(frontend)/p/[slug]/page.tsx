@@ -5,6 +5,8 @@ import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import React, { cache } from 'react'
+import { ProductHero } from '@/heros/ProductHero'
+import { RelatedProducts } from '@/blocks/RelatedProducts/Component'
 
 // Types for product data returned from Payload
 interface Product {
@@ -48,7 +50,7 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
 
   return (
     <article className="pt-16 pb-24">
-      <Hero product={product} />
+      <ProductHero product={product} />
       <Carousel images={product.images} />
       <ShortDescription text={product.shortDescription} />
       <FeatureTrio features={product.features} />
@@ -98,14 +100,6 @@ const queryRelatedProducts = cache(async ({ tags, slug }: { tags: string[]; slug
   })
   return result.docs as Product[]
 })
-
-function Hero({ product }: { product: Product }) {
-  return (
-    <section className="container">
-      <h1 className="text-4xl font-bold text-center">{product.title}</h1>
-    </section>
-  )
-}
 
 function Carousel({ images = [] }: { images?: { url: string; alt?: string }[] }) {
   if (!images.length) return null
@@ -162,21 +156,6 @@ function PrimaryCTA({ slug }: { slug: string }) {
   )
 }
 
-function RelatedProducts({ products = [] }: { products: Product[] }) {
-  if (!products.length) return null
-  return (
-    <section className="container mt-16">
-      <h2 className="text-2xl font-bold mb-6">Related products</h2>
-      <div className="grid gap-6 md:grid-cols-3">
-        {products.map((p) => (
-          <Link key={p.slug} href={`/p/${p.slug}`} className="block border rounded p-4">
-            {p.title}
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
 
 function StickyCTA({ slug }: { slug: string }) {
   return (
