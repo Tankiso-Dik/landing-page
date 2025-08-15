@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadCached } from '@/utilities/getPayloadCached'
 
 export const runtime = 'nodejs'
 
@@ -24,7 +23,7 @@ function pickWeightedDestination(destinations: any[]): any | undefined {
 }
 
 export async function GET(): Promise<Response> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadCached()
 
   const products = await payload.find({
     collection: 'products',

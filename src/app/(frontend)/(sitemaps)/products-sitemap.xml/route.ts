@@ -3,13 +3,12 @@
  * 1000-item cap.
  */
 import { getServerSideSitemap } from 'next-sitemap'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
+import { getPayloadCached } from '@/utilities/getPayloadCached'
 
 const getProductsSitemap = unstable_cache(
   async () => {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadCached()
     const SITE_URL =
       process.env.NEXT_PUBLIC_SERVER_URL ||
       process.env.VERCEL_PROJECT_PRODUCTION_URL ||
@@ -46,13 +45,11 @@ const getProductsSitemap = unstable_cache(
     const dateFallback = new Date().toISOString()
 
     const sitemap = allProducts
-      ? allProducts
-          .filter((product) => Boolean(product?.slug))
-          .map((product) => ({
-            loc: `${SITE_URL}/p/${product?.slug}`,
-            lastmod: product.updatedAt || dateFallback,
-          }))
-      : []
+      .filter((product) => Boolean(product?.slug))
+      .map((product) => ({
+        loc: `${SITE_URL}/p/${product?.slug}`,
+        lastmod: product.updatedAt || dateFallback,
+      }))
 
     return sitemap
   },

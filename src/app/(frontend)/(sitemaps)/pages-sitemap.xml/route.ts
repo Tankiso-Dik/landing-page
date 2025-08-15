@@ -3,13 +3,12 @@
  * to 1000 entries.
  */
 import { getServerSideSitemap } from 'next-sitemap'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
+import { getPayloadCached } from '@/utilities/getPayloadCached'
 
 const getPagesSitemap = unstable_cache(
   async () => {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadCached()
     const SITE_URL =
       process.env.NEXT_PUBLIC_SERVER_URL ||
       process.env.VERCEL_PROJECT_PRODUCTION_URL ||
@@ -57,15 +56,11 @@ const getPagesSitemap = unstable_cache(
     ]
 
     const sitemap = allPages
-      ? allPages
-          .filter((page) => Boolean(page?.slug))
-          .map((page) => {
-            return {
-              loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
-              lastmod: page.updatedAt || dateFallback,
-            }
-          })
-      : []
+      .filter((page) => Boolean(page?.slug))
+      .map((page) => ({
+        loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
+        lastmod: page.updatedAt || dateFallback,
+      }))
 
     return [...defaultSitemap, ...sitemap]
   },
