@@ -3,15 +3,7 @@
 import { Media } from '@/components/Media'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
-
-type Product = {
-  slug?: string
-  title?: string
-  image?: any
-  meta?: {
-    image?: any
-  }
-}
+import type { Product } from '@/types/product'
 
 export const HomepageHero: React.FC<{ products: Product[] }> = ({ products }) => {
   const [index, setIndex] = useState(0)

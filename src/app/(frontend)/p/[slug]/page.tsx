@@ -5,16 +5,7 @@ import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import React, { cache } from 'react'
-
-// Types for product data returned from Payload
-interface Product {
-  slug: string
-  title: string
-  images?: { url: string; alt?: string }[]
-  shortDescription?: string
-  features?: { title: string; description: string }[]
-  tags?: string[]
-}
+import type { Product } from '@/types/product'
 
 type Args = {
   params: Promise<{ slug?: string }>
