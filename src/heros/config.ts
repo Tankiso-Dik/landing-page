@@ -66,6 +66,13 @@ export const hero: Field = {
       },
       relationTo: 'media',
       required: true,
+      fields: [
+        {
+          name: 'alt',
+          type: 'text',
+          required: true,
+        },
+      ],
     },
   ],
   label: false,

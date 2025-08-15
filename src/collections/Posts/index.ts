@@ -83,6 +83,13 @@ export const Posts: CollectionConfig<'posts'> = {
               name: 'heroImage',
               type: 'upload',
               relationTo: 'media',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'text',
+                  required: true,
+                },
+              ],
             },
             {
               name: 'content',
