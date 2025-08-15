@@ -1,3 +1,7 @@
+/**
+ * Uses paginated queries to avoid the previous fixed 1000-item fetch when
+ * generating static product pages.
+ */
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -13,15 +17,25 @@ type Args = {
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  const products = await payload.find({
-    collection: 'products',
-    draft: false,
-    limit: 1000,
-    pagination: false,
-    select: { slug: true },
-  })
+  const params: { slug: string }[] = []
+  let page = 1
+  let hasNextPage = true
 
-  return products.docs.map(({ slug }) => ({ slug }))
+  while (hasNextPage) {
+    const products = await payload.find({
+      collection: 'products',
+      draft: false,
+      limit: 100,
+      page,
+      select: { slug: true },
+    })
+
+    params.push(...products.docs.map(({ slug }) => ({ slug })))
+    hasNextPage = products.hasNextPage
+    page += 1
+  }
+
+  return params
 }
 
 export default async function ProductPage({ params: paramsPromise }: Args) {

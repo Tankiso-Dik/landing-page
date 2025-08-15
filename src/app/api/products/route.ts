@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadCached } from '@/utilities/getPayloadCached'
 
 export const runtime = 'nodejs'
 
@@ -12,7 +11,7 @@ const select = {
 }
 
 export async function GET(req: NextRequest): Promise<Response> {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadCached()
   const { searchParams } = new URL(req.url)
 
   const limitParam = searchParams.get('limit')
