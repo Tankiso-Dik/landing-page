@@ -26,36 +26,48 @@ function pickWeightedDestination(destinations: any[]): any | undefined {
 export async function GET(): Promise<Response> {
   const payload = await getPayload({ config })
 
-  const products = await payload.find({
-    collection: 'products',
-    where: { status: { equals: 'published' } },
-    pagination: false,
-    select,
-  })
+  try {
+    const products = await payload.find({
+      collection: 'products',
+      where: { status: { equals: 'published' } },
+      pagination: false,
+      select,
+    })
 
-  if (!products.docs.length) {
-    return Response.json(null, {
+    if (!products.docs.length) {
+      return Response.json(null, {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      })
+    }
+
+    const product = products.docs[Math.floor(Math.random() * products.docs.length)] as any
+
+    const destination = pickWeightedDestination(product.destinations || [])
+
+    const result = {
+      slug: product.slug,
+      listingName: product.listingName,
+      summary: product.summary,
+      heroImage: product.heroImage,
+      destination,
+    }
+
+    return Response.json(result, {
       headers: {
         'Cache-Control': 'no-store',
       },
     })
+  } catch (err) {
+    return Response.json(
+      { error: 'Failed to fetch products' },
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      },
+    )
   }
-
-  const product = products.docs[Math.floor(Math.random() * products.docs.length)] as any
-
-  const destination = pickWeightedDestination(product.destinations || [])
-
-  const result = {
-    slug: product.slug,
-    listingName: product.listingName,
-    summary: product.summary,
-    heroImage: product.heroImage,
-    destination,
-  }
-
-  return Response.json(result, {
-    headers: {
-      'Cache-Control': 'no-store',
-    },
-  })
 }
