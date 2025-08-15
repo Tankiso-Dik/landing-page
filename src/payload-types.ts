@@ -254,6 +254,27 @@ export interface Post {
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  title: string;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  slug?: string | null;
+  updatedAt?: string;
+  createdAt?: string;
+  _status?: ('draft' | 'published') | null;
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
