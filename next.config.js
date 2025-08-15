@@ -31,6 +31,9 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  experimental: {
+    runtime: 'nodejs',
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
