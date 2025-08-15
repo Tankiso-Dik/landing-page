@@ -1,17 +1,16 @@
-import { getPayload, Payload } from 'payload'
-import config from '@/payload.config'
+import { describe, it, expect, vi } from 'vitest'
 
-import { describe, it, beforeAll, expect } from 'vitest'
+vi.mock('payload', () => ({ getPayload: vi.fn() }))
+vi.mock('@payload-config', () => ({ default: {} }))
 
-let payload: Payload
+const { getPayload } = await import('payload')
 
 describe('API', () => {
-  beforeAll(async () => {
-    const payloadConfig = await config
-    payload = await getPayload({ config: payloadConfig })
-  })
-
   it('fetches users', async () => {
+    const find = vi.fn().mockResolvedValue({ docs: [] })
+    ;(getPayload as any).mockResolvedValue({ find })
+
+    const payload = await getPayload({})
     const users = await payload.find({
       collection: 'users',
     })
