@@ -17,9 +17,12 @@ import { SiteSettings } from './globals/SiteSettings'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { assertEnv } from '@/utilities/assertEnv'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+assertEnv(['POSTGRES_URL', 'BLOB_READ_WRITE_TOKEN', 'PAYLOAD_SECRET', 'CRON_SECRET'])
 
 export default buildConfig({
   admin: {

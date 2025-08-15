@@ -18,7 +18,13 @@ const redirects = async () => {
     permanent: true,
   }
 
-  const redirects = [internetExplorerRedirect, postsRedirect]
+  const productsRedirect = {
+    source: '/products/:slug',
+    destination: '/p/:slug',
+    permanent: true,
+  }
+
+  const redirects = [internetExplorerRedirect, postsRedirect, productsRedirect]
 
   return redirects
 }
