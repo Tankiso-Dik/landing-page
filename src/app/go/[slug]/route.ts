@@ -25,13 +25,43 @@ export async function GET(
   const product = docs?.[0]
 
   if (!product) {
-    return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } })
+    const msg = `Product not found: ${slug}`
+    console.error(msg)
+    return new Response(msg, { status: 404, headers: { 'Cache-Control': 'no-store' } })
   }
 
-  const destinations = (product.destinations || []).filter((d: any) => d.active)
+  if (!Array.isArray(product.destinations)) {
+    console.error(`Invalid destinations for product ${slug}: not an array`)
+    return new Response('Invalid destinations', {
+      status: 400,
+      headers: { 'Cache-Control': 'no-store' },
+    })
+  }
+
+  const allValid = product.destinations.every(
+    (d: any) =>
+      d &&
+      typeof d.url === 'string' &&
+      typeof d.weight === 'number' &&
+      typeof d.active === 'boolean',
+  )
+
+  if (!allValid) {
+    console.error(`Invalid destination entries for product ${slug}`)
+    return new Response('Invalid destinations', {
+      status: 400,
+      headers: { 'Cache-Control': 'no-store' },
+    })
+  }
+
+  const destinations = product.destinations.filter((d: any) => d.active)
 
   if (!destinations.length) {
-    return new Response('No destinations', { status: 404, headers: { 'Cache-Control': 'no-store' } })
+    console.error(`No active destinations for product ${slug}`)
+    return new Response('No destinations', {
+      status: 404,
+      headers: { 'Cache-Control': 'no-store' },
+    })
   }
 
   const siteSettings = await payload.findGlobal<{ defaultUTMParams?: { key: string; value: string }[] }>({
