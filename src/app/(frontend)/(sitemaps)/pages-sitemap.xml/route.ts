@@ -2,6 +2,9 @@ import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
+import { assertEnv } from '@/utilities/assertEnv'
+
+assertEnv(['NEXT_PUBLIC_SERVER_URL', 'VERCEL_PROJECT_PRODUCTION_URL'])
 
 const getPagesSitemap = unstable_cache(
   async () => {
