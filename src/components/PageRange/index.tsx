@@ -1,14 +1,18 @@
 import React from 'react'
 
 const defaultLabels = {
-  plural: 'Docs',
-  singular: 'Doc',
+  plural: 'Products',
+  singular: 'Product',
 }
 
 const defaultCollectionLabels = {
   posts: {
     plural: 'Posts',
     singular: 'Post',
+  },
+  products: {
+    plural: 'Products',
+    singular: 'Product',
   },
 }
 
