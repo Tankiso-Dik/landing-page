@@ -1,22 +1,31 @@
+/**
+ * Builds the products sitemap with paginated queries, removing the fixed
+ * 1000-item cap.
+ */
 import { getServerSideSitemap } from 'next-sitemap'
 import { unstable_cache } from 'next/cache'
 import { getPayloadCached } from '@/utilities/getPayloadCached'
 
 const getProductsSitemap = unstable_cache(
-    async () => {
-      const payload = await getPayloadCached()
-      const SITE_URL =
-        process.env.NEXT_PUBLIC_SERVER_URL ||
-        process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-        'https://example.com'
+  async () => {
+    const payload = await getPayloadCached()
+    const SITE_URL =
+      process.env.NEXT_PUBLIC_SERVER_URL ||
+      process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+      'https://example.com'
 
-      const results = await payload.find({
+    const allProducts: { slug?: string; updatedAt?: string }[] = []
+    let page = 1
+    let hasNextPage = true
+
+    while (hasNextPage) {
+      const result = await payload.find({
         collection: 'products',
         overrideAccess: false,
         draft: false,
         depth: 0,
-        limit: 1000,
-        pagination: false,
+        limit: 100,
+        page,
         where: {
           _status: {
             equals: 'published',
@@ -28,24 +37,27 @@ const getProductsSitemap = unstable_cache(
         },
       })
 
-      const dateFallback = new Date().toISOString()
+      allProducts.push(...result.docs)
+      hasNextPage = result.hasNextPage
+      page += 1
+    }
 
-      const sitemap = results.docs
-        ? results.docs
-            .filter((product) => Boolean(product?.slug))
-            .map((product) => ({
-              loc: `${SITE_URL}/p/${product?.slug}`,
-              lastmod: product.updatedAt || dateFallback,
-            }))
-        : []
+    const dateFallback = new Date().toISOString()
 
-      return sitemap
-    },
-    ['products-sitemap'],
-    {
-      tags: ['products-sitemap'],
-    },
-  )
+    const sitemap = allProducts
+      .filter((product) => Boolean(product?.slug))
+      .map((product) => ({
+        loc: `${SITE_URL}/p/${product?.slug}`,
+        lastmod: product.updatedAt || dateFallback,
+      }))
+
+    return sitemap
+  },
+  ['products-sitemap'],
+  {
+    tags: ['products-sitemap'],
+  },
+)
 
 export async function GET() {
   const sitemap = await getProductsSitemap()
