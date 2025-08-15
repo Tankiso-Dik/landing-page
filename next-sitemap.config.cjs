@@ -8,8 +8,8 @@ module.exports = {
   siteUrl: SITE_URL,
   generateRobotsTxt: true,
   exclude: [
+    '/products-sitemap.xml',
     '/pages-sitemap.xml',
-    '/p-sitemap.xml',
     '/api/*',
     '/p/*',
     '/*',
@@ -23,7 +23,7 @@ module.exports = {
     ],
     additionalSitemaps: [
       `${SITE_URL}/pages-sitemap.xml`,
-      `${SITE_URL}/p-sitemap.xml`,
+      `${SITE_URL}/products-sitemap.xml`,
     ],
   },
 }
