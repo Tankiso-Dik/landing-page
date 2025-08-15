@@ -1,36 +1,50 @@
+/**
+ * Builds the pages sitemap using paginated queries to avoid limiting results
+ * to 1000 entries.
+ */
 import { getServerSideSitemap } from 'next-sitemap'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { assertEnv } from '@/utilities/assertEnv'
+import { getPayloadCached } from '@/utilities/getPayloadCached'
 
+// Ensure required env variables are set before running
 assertEnv(['NEXT_PUBLIC_SERVER_URL', 'VERCEL_PROJECT_PRODUCTION_URL'])
 
 const getPagesSitemap = unstable_cache(
   async () => {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadCached()
     const SITE_URL =
       process.env.NEXT_PUBLIC_SERVER_URL ||
       process.env.VERCEL_PROJECT_PRODUCTION_URL ||
       'https://example.com'
 
-    const results = await payload.find({
-      collection: 'pages',
-      overrideAccess: false,
-      draft: false,
-      depth: 0,
-      limit: 1000,
-      pagination: false,
-      where: {
-        _status: {
-          equals: 'published',
+    const allPages: { slug?: string; updatedAt?: string }[] = []
+    let page = 1
+    let hasNextPage = true
+
+    while (hasNextPage) {
+      const result = await payload.find({
+        collection: 'pages',
+        overrideAccess: false,
+        draft: false,
+        depth: 0,
+        limit: 100,
+        page,
+        where: {
+          _status: {
+            equals: 'published',
+          },
         },
-      },
-      select: {
-        slug: true,
-        updatedAt: true,
-      },
-    })
+        select: {
+          slug: true,
+          updatedAt: true,
+        },
+      })
+
+      allPages.push(...result.docs)
+      hasNextPage = result.hasNextPage
+      page += 1
+    }
 
     const dateFallback = new Date().toISOString()
 
@@ -45,16 +59,12 @@ const getPagesSitemap = unstable_cache(
       },
     ]
 
-    const sitemap = results.docs
-      ? results.docs
-          .filter((page) => Boolean(page?.slug))
-          .map((page) => {
-            return {
-              loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
-              lastmod: page.updatedAt || dateFallback,
-            }
-          })
-      : []
+    const sitemap = allPages
+      .filter((page) => Boolean(page?.slug))
+      .map((page) => ({
+        loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
+        lastmod: page.updatedAt || dateFallback,
+      }))
 
     return [...defaultSitemap, ...sitemap]
   },
@@ -66,6 +76,5 @@ const getPagesSitemap = unstable_cache(
 
 export async function GET() {
   const sitemap = await getPagesSitemap()
-
   return getServerSideSitemap(sitemap)
 }
