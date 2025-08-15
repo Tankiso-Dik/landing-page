@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { getPayloadCached } from '@/utilities/getPayloadCached'
 
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -13,7 +12,7 @@ export async function GET(
   { params }: { params: { slug: string } },
 ): Promise<Response> {
   const { slug } = params
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadCached()
 
   const { docs } = await payload.find<{ destinations?: any[] }>({
     collection: 'products',
