@@ -1,3 +1,7 @@
+/**
+ * Builds the pages sitemap using paginated queries to avoid limiting results
+ * to 1000 entries.
+ */
 import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -11,23 +15,33 @@ const getPagesSitemap = unstable_cache(
       process.env.VERCEL_PROJECT_PRODUCTION_URL ||
       'https://example.com'
 
-    const results = await payload.find({
-      collection: 'pages',
-      overrideAccess: false,
-      draft: false,
-      depth: 0,
-      limit: 1000,
-      pagination: false,
-      where: {
-        _status: {
-          equals: 'published',
+    const allPages: { slug?: string; updatedAt?: string }[] = []
+    let page = 1
+    let hasNextPage = true
+
+    while (hasNextPage) {
+      const result = await payload.find({
+        collection: 'pages',
+        overrideAccess: false,
+        draft: false,
+        depth: 0,
+        limit: 100,
+        page,
+        where: {
+          _status: {
+            equals: 'published',
+          },
         },
-      },
-      select: {
-        slug: true,
-        updatedAt: true,
-      },
-    })
+        select: {
+          slug: true,
+          updatedAt: true,
+        },
+      })
+
+      allPages.push(...result.docs)
+      hasNextPage = result.hasNextPage
+      page += 1
+    }
 
     const dateFallback = new Date().toISOString()
 
@@ -42,8 +56,8 @@ const getPagesSitemap = unstable_cache(
       },
     ]
 
-    const sitemap = results.docs
-      ? results.docs
+    const sitemap = allPages
+      ? allPages
           .filter((page) => Boolean(page?.slug))
           .map((page) => {
             return {

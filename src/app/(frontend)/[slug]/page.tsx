@@ -1,3 +1,7 @@
+/**
+ * Generates page routes using paginated queries instead of a fixed
+ * 1000-item fetch.
+ */
 import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
@@ -15,24 +19,28 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
+  const pages: { slug?: string }[] = []
+  let page = 1
+  let hasNextPage = true
 
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
+  while (hasNextPage) {
+    const result = await payload.find({
+      collection: 'pages',
+      draft: false,
+      limit: 100,
+      overrideAccess: false,
+      page,
+      select: { slug: true },
     })
-    .map(({ slug }) => {
-      return { slug }
-    })
+
+    pages.push(...result.docs)
+    hasNextPage = result.hasNextPage
+    page += 1
+  }
+
+  const params = pages
+    .filter((doc) => doc.slug !== 'home')
+    .map(({ slug }) => ({ slug }))
 
   return params
 }
