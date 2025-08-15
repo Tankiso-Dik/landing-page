@@ -11,7 +11,6 @@ module.exports = {
     '/products-sitemap.xml',
     '/pages-sitemap.xml',
     '/api/*',
-    '/posts/*',
     '/p/*',
     '/*',
   ],
