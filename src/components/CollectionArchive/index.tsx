@@ -1,15 +1,14 @@
 import { cn } from '@/utilities/ui'
 import React from 'react'
 
-import { Card, CardPostData } from '@/components/Card'
+import { Card, CardProductData } from '@/components/Card'
 
 export type Props = {
-  posts: CardPostData[]
-  relationTo?: 'posts' | 'products'
+  posts: CardProductData[]
+  relationTo?: 'products'
 }
 
-export const CollectionArchive: React.FC<Props> = ({ posts, relationTo = 'posts' }) => {
-
+export const CollectionArchive: React.FC<Props> = ({ posts, relationTo = 'products' }) => {
   return (
     <div className={cn('container')}>
       <div>
@@ -22,12 +21,11 @@ export const CollectionArchive: React.FC<Props> = ({ posts, relationTo = 'posts'
                     className="h-full"
                     doc={result}
                     relationTo={relationTo}
-                    showCategories={relationTo === 'posts'}
+                    showCategories={relationTo === 'products'}
                   />
                 </div>
               )
             }
-
             return null
           })}
         </div>
